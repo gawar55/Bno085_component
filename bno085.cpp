@@ -15,9 +15,9 @@ bno::bno(gpio_num_t TX_PIN,gpio_num_t RX_PIN,int BUF_SIZE , uart_port_t UART_NUM
 }
 
 void bno::read(uint8_t* data,size_t buffer_size){
-    uart_read_bytes(UART_NUM, data, buffer_size, pdMS_TO_TICKS(10));
+    int len = uart_read_bytes(UART_NUM, data, buffer_size, pdMS_TO_TICKS(1));
 
-    for(int i=0 ; i < sizeof(data); i++){
+    for(int i=0 ; i < buffer_size; i++){
         if(data[i] == 0xAA && data[i+1] == 0xAA){
             uint8_t received_checksum = data[i + 18]; 
             uint8_t calculated_checksum = 0;
@@ -34,16 +34,16 @@ void bno::read(uint8_t* data,size_t buffer_size){
                 int16_t y_Acc = (data[i + 12] << 8) | data[i + 11];
                 int16_t z_Acc = (data[i + 14] << 8) | data[i + 13];
 
-                float actual_yaw = yaw * 0.01f;
-                float actual_pitch = pitch * 0.01f;
-                float actual_roll = roll * 0.01f;
-                float acc_x = x_Acc * (9.80665 / 1000.0f);
-                float acc_y = y_Acc * (9.80665 / 1000.0f);
-                float acc_z = z_Acc * (9.80665 / 1000.0f);
+                actual_yaw = yaw * 0.01f;
+                actual_pitch = pitch * 0.01f;
+                actual_roll = roll * 0.01f;
+                acc_x = x_Acc * (9.80665 / 1000.0f);
+                acc_y = y_Acc * (9.80665 / 1000.0f);
+                acc_z = z_Acc * (9.80665 / 1000.0f);
                 
-                printf("Yaw %f ",actual_yaw);
-                printf("pitch %f ",actual_pitch);
-                printf("roll %f\n",actual_roll);
+                // printf("Yaw %f \n",actual_yaw);
+                // printf("pitch %f ",actual_pitch);
+                // printf("roll %f\n",actual_roll);
                 // printf("Acceleration in X: %f ",acc_x);
                 // printf("Acceleration in Y: %f ",acc_y);
                 // printf("Acceleration in Z: %f\n",acc_z);
@@ -51,5 +51,6 @@ void bno::read(uint8_t* data,size_t buffer_size){
                 // printf("Checksum validation failed. Received: 0x%02X, Calculated: 0x%02X\n", received_checksum, calculated_checksum);
             }
         }
+        // else printf("%d \n" , len);
     }
 }
