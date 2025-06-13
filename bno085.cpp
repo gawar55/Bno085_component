@@ -15,9 +15,9 @@ bno::bno(gpio_num_t TX_PIN,gpio_num_t RX_PIN,int BUF_SIZE , uart_port_t UART_NUM
 }
 
 void bno::read(uint8_t* data,size_t buffer_size){
-    int len = uart_read_bytes(UART_NUM, data, buffer_size, pdMS_TO_TICKS(1));
+    int len = uart_read_bytes(UART_NUM, data, buffer_size, pdMS_TO_TICKS(10));
 
-    for(int i=0 ; i < buffer_size; i++){
+    for(int i=0 ; i < len - 19; i++){
         if(data[i] == 0xAA && data[i+1] == 0xAA){
             uint8_t received_checksum = data[i + 18]; 
             uint8_t calculated_checksum = 0;
@@ -27,9 +27,9 @@ void bno::read(uint8_t* data,size_t buffer_size){
             }
 
             if (received_checksum == calculated_checksum) {
-                int16_t yaw = (data[4] << 8) | data[3];
-                int16_t pitch = (data[6] << 8) | data[5];
-                int16_t roll = (data[8] << 8) | data[7];
+                int16_t yaw = (data[i + 4] << 8) | data[i + 3];
+                int16_t pitch = (data[i + 6] << 8) | data[i + 5];
+                int16_t roll = (data[i + 8] << 8) | data[i + 7];
                 int16_t x_Acc = (data[i + 10] << 8) | data[i + 9];
                 int16_t y_Acc = (data[i + 12] << 8) | data[i + 11];
                 int16_t z_Acc = (data[i + 14] << 8) | data[i + 13];
@@ -41,7 +41,7 @@ void bno::read(uint8_t* data,size_t buffer_size){
                 acc_y = y_Acc * (9.80665 / 1000.0f);
                 acc_z = z_Acc * (9.80665 / 1000.0f);
                 
-                // printf("Yaw %f \n",actual_yaw);
+                // printf("Yaw %f ",actual_yaw);
                 // printf("pitch %f ",actual_pitch);
                 // printf("roll %f\n",actual_roll);
                 // printf("Acceleration in X: %f ",acc_x);
